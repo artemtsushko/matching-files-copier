@@ -12,7 +12,7 @@ main = do
     beginning <- getLine
     let contentsWithBeginning = filterBeginsWith beginning directoryContents
         matchingPaths = map (combine inputDirectory) contentsWithBeginning
-    filesToCopy <- filterIsFile matchingPaths
+    filesToCopy <- filterM (doesFileExist) matchingPaths
     sizes <- forM filesToCopy (\filename -> do
         size <- getFileSize filename
         putStrLn $ filename ++ " " ++ show size
@@ -22,15 +22,6 @@ main = do
 
 filterBeginsWith :: String -> [FilePath] -> [FilePath]
 filterBeginsWith beginning = filter (beginning `isPrefixOf`)
-
-
-filterIsFile :: [FilePath] -> IO [FilePath]
-filterIsFile files = do
-    filenames <- forM files (\filename -> do
-        isFile <- doesFileExist filename
-        return $ if isFile then filename else "")
-    return $ filter (not . null) filenames
-
 
 getFileSize :: String -> IO FileOffset
 getFileSize path = do
