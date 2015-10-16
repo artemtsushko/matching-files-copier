@@ -6,18 +6,19 @@ import Control.Monad
 import Data.List
 
 main = do
-    [inputDirectory, outputDirectory] <- getArgs
+    [inputDir, outputDir] <- getArgs
     putStr "enter file beginning: "
     beginning <- getLine
-    directoryContents <- getDirectoryContents inputDirectory
-    filesToCopy <- filterM (doesFileExist)
-                 . map (combine inputDirectory)
+    directoryContents <- getDirectoryContents inputDir
+    filesToCopy <- filterM (doesFileExist . (combine inputDir))
                  . filter (beginning `isPrefixOf`)
                  $ directoryContents
-    sizes <- forM filesToCopy getFileSize
+    forM_ filesToCopy (\filename -> do
+        copyFile (combine inputDir filename) (combine outputDir filename))
+    sizes <- mapM getFileSize $ map (combine inputDir) filesToCopy
+    putStrLn $ "Copied " ++ (show $ sum sizes) ++ " bytes."
 -- debug
     print $ zip filesToCopy sizes
-    print $ sum sizes
 
 getFileSize :: String -> IO FileOffset
 getFileSize path = do
