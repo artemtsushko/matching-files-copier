@@ -7,15 +7,15 @@ import Data.List
 
 main = do
     [inputDir, outputDir] <- getArgs
-    putStr "enter file beginning: "
-    beginning <- getLine
-    directoryContents <- getDirectoryContents inputDir
+    beginning <- putStr "enter file beginning: " >> getLine
     filesToCopy <- filterM (doesFileExist . (combine inputDir))
                  . filter (beginning `isPrefixOf`)
-                 $ directoryContents
-    forM_ filesToCopy (\filename -> do
-        copyFile (combine inputDir filename) (combine outputDir filename))
-    sizes <- mapM getFileSize $ map (combine inputDir) filesToCopy
+               =<< getDirectoryContents inputDir
+    sizes <- forM filesToCopy (\filename -> do
+        let inputFile = combine inputDir filename
+            outputFile = combine outputDir filename
+        copyFile inputFile outputFile
+        getFileSize inputFile )
     putStrLn $ "Copied " ++ (show $ sum sizes) ++ " bytes."
 -- debug
     print $ zip filesToCopy sizes
