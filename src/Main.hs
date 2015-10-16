@@ -22,13 +22,14 @@ module Main (
 import System.Directory
 import System.Environment
 import System.FilePath.Posix (combine)
+import System.IO
 import System.Posix
 import Control.Monad
 import Data.List
 
 main = do
     [inputDir, outputDir] <- getArgs
-    beginning <- putStr "enter file beginning: " >> getLine
+    beginning <- putStr "enter file beginning: " >> hFlush stdout >> getLine
     filesToCopy <- filterM (doesFileExist . combine inputDir)
                  . filter (beginning `isPrefixOf`)
                =<< getDirectoryContents inputDir
