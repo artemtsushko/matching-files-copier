@@ -1,13 +1,14 @@
 -----------------------------------------------------------------------------
---
--- Module      :  Main
--- Copyright   :  Copyright (c) 2015 Artem Tsushko
--- License     :  BSD3
---
--- Maintainer  :  Artem Tsushko <artemtsushko@gmail.com>
--- Stability   :  provisional
---
 -- |
+-- Module      :  Main
+-- Description :  Copies all files with the specified filename beginning
+--                from the first directory to the second directory
+-- Copyright   :  (c) Artem Tsushko, 2015
+-- License     :  BSD3
+-- Maintainer  :  artemtsushko@gmail.com
+-- Stability   :  provisional
+-- Portability :  POSIX
+--
 -- Copies all files with the specified filename beginning
 -- from the first directory to the second directory
 -- /Usage/
