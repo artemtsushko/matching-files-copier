@@ -24,27 +24,43 @@ import System.Directory
 import System.Environment
 import System.FilePath.Posix (combine)
 import System.IO
+import System.IO.Error
 import System.Posix
 import Control.Monad
 import Data.List
 
-main = do
-    [inputDir, outputDir] <- getArgs
-    beginning <- putStr "enter file beginning: " >> hFlush stdout >> getLine
-    filesToCopy <- filterM (doesFileExist . combine inputDir)
-                 . filter (beginning `isPrefixOf`)
-               =<< getDirectoryContents inputDir
-    sizes <- forM filesToCopy (\filename -> do
-        let inputFile = combine inputDir filename
-            outputFile = combine outputDir filename
-        copyFile inputFile outputFile
-        getFileSize inputFile )
-    putStrLn $ "Copied " ++ show (sum sizes) ++ " bytes."
--- debug
-    print $ zip filesToCopy sizes
+main :: IO ()
+main = copyMatchingFiles `catchIOError`  handleError
+
+copyMatchingFiles :: IO ()
+copyMatchingFiles = do
+    (inputDir:outputDir:_) <- mapM canonicalizePath =<< getArgs
+    if inputDir /= outputDir
+    then do
+        beginning <- putStr "enter file beginning: " >> hFlush stdout >> getLine
+        filesToCopy <- filterM (doesFileExist . combine inputDir)
+                     . filter (beginning `isPrefixOf`)
+                   =<< getDirectoryContents inputDir
+        sizes <- forM filesToCopy (\filename -> do
+            let inputFile = combine inputDir filename
+                outputFile = combine outputDir filename
+            copyFile inputFile outputFile
+            getFileSize inputFile )
+        putStrLn $ "Copied " ++ show (sum sizes) ++ " bytes."
+    else
+        putStrLn "Both directories are the same"
 
 getFileSize :: String -> IO FileOffset
 getFileSize path = do
     stat <- getFileStatus path
     return (fileSize stat)
 
+handleError :: IOError -> IO ()
+handleError e
+    | isUserError e = do -- triggered if user didn't at least 2 arguments
+        progName <- getProgName
+        putStrLn $ "Usage: " ++ progName ++ " " ++ "<inputDirPath> <outputDirPath>"
+    | isDoesNotExistError e = case ioeGetFileName e of
+        Just path -> putStrLn $ "Directory does not exist at: " ++ path
+        Nothing -> putStrLn "File or directory does not exist"
+    | otherwise = ioError e
