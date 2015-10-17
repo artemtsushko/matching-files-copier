@@ -32,6 +32,10 @@ import Data.List
 main :: IO ()
 main = copyMatchingFiles `catchIOError`  handleError
 
+{- | Asks user for filename beginning and then copies all files matching this
+     filename pattern from the first directory to the second one. Directory
+     paths are provided as command line arguments
+-}
 copyMatchingFiles :: IO ()
 copyMatchingFiles = do
     (inputDir:outputDir:_) <- mapM canonicalizePath =<< getArgs
@@ -50,11 +54,17 @@ copyMatchingFiles = do
     else
         putStrLn "Both directories are the same"
 
+-- | Takes a path to file and returns the file's size in bytes
 getFileSize :: String -> IO FileOffset
 getFileSize path = do
     stat <- getFileStatus path
     return (fileSize stat)
 
+{- | Handles errors in such cases:
+
+        * User didn't pass at least 2 command line arguments
+        * The specified paths don't point to existing directories
+-}
 handleError :: IOError -> IO ()
 handleError e
     | isUserError e = do -- triggered if user didn't at least 2 arguments
