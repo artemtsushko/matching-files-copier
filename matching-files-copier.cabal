@@ -2,8 +2,8 @@ name: matching-files-copier
 version: 0.1
 cabal-version: 1.22
 build-type: Simple
-license: AllRightsReserved
-copyright: Copyright (c) 2015 Artem Tsushko
+license: BSD3
+copyright: (c) Artem Tsushko, 2015
 maintainer: artemtsushko@gmail.com
 stability: provisional
 synopsis: copies files with matching filename beginning from one directory to another
